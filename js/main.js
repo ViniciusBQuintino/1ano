@@ -1,20 +1,115 @@
 const PLACEHOLDER = "assets/images/placeholder-foto.svg";
+const VIDEO_EXTENSIONS = /\.(mp4|webm|mov|ogg|m4v)(\?.*)?$/i;
+
+function getMediaSrc(item) {
+  return item?.media || item?.photo || item?.src || null;
+}
+
+function isVideoSrc(src) {
+  return VIDEO_EXTENSIONS.test(src);
+}
+
+function createMediaHtml(src, title, { preview = false, className = "" } = {}) {
+  if (!src) return "";
+
+  if (isVideoSrc(src)) {
+    const previewAttrs = preview
+      ? 'muted playsinline preload="metadata"'
+      : 'controls playsinline preload="auto"';
+    return `<video src="${src}" class="${className}" ${previewAttrs} aria-label="${title}"></video>`;
+  }
+
+  return `<img
+    src="${src}"
+    alt="${title}"
+    class="${className}"
+    loading="lazy"
+    onerror="this.src='${PLACEHOLDER}'"
+  >`;
+}
+
+function createPreviewWrap(src, title, { wrapClass = "timeline__photo-wrap", mediaClass = "timeline__photo" } = {}) {
+  const videoClass = isVideoSrc(src) ? `${wrapClass} ${wrapClass}--video` : wrapClass;
+  const badge = isVideoSrc(src) ? '<span class="media-play-badge" aria-hidden="true">▶</span>' : "";
+
+  return `<div class="${videoClass}">
+    ${createMediaHtml(src, title, { preview: true, className: mediaClass })}
+    ${badge}
+  </div>`;
+}
+
+function pauseVideos(container) {
+  container?.querySelectorAll("video").forEach((video) => {
+    video.pause();
+  });
+}
+
+function clearMediaWrap(wrap) {
+  if (!wrap) return;
+  pauseVideos(wrap);
+  wrap.innerHTML = "";
+  wrap.hidden = true;
+}
+
+function setMediaWrap(wrap, src, title, { preview = false, className = "" } = {}) {
+  if (!src) {
+    clearMediaWrap(wrap);
+    return;
+  }
+
+  wrap.hidden = false;
+  wrap.innerHTML = "";
+
+  if (isVideoSrc(src)) {
+    const video = document.createElement("video");
+    video.src = src;
+    video.className = className;
+    video.playsInline = true;
+    video.setAttribute("aria-label", title);
+
+    if (preview) {
+      video.muted = true;
+      video.preload = "metadata";
+      wrap.classList.add("timeline__photo-wrap--video");
+
+      const badge = document.createElement("span");
+      badge.className = "media-play-badge";
+      badge.setAttribute("aria-hidden", "true");
+      badge.textContent = "▶";
+
+      wrap.appendChild(video);
+      wrap.appendChild(badge);
+    } else {
+      video.controls = true;
+      video.preload = "auto";
+      wrap.classList.remove("timeline__photo-wrap--video");
+      wrap.appendChild(video);
+    }
+
+    return;
+  }
+
+  wrap.classList.remove("timeline__photo-wrap--video");
+
+  const img = document.createElement("img");
+  img.src = src;
+  img.alt = title;
+  img.className = className;
+  img.loading = preview ? "lazy" : "eager";
+  img.onerror = () => {
+    img.src = PLACEHOLDER;
+  };
+  wrap.appendChild(img);
+}
 
 function createTimelineEvent(event, index, openCardModal) {
   const el = document.createElement("article");
   el.className = `timeline__event timeline__event--${event.side}`;
   el.style.setProperty("--delay", `${index * 0.1}s`);
 
-  const photoHtml = event.photo
-    ? `<div class="timeline__photo-wrap">
-        <img
-          src="${event.photo}"
-          alt="${event.title}"
-          class="timeline__photo"
-          loading="lazy"
-          onerror="this.src='${PLACEHOLDER}'"
-        >
-      </div>`
+  const mediaSrc = getMediaSrc(event);
+  const mediaHtml = mediaSrc
+    ? createPreviewWrap(mediaSrc, event.title)
     : "";
 
   el.innerHTML = `
@@ -23,7 +118,7 @@ function createTimelineEvent(event, index, openCardModal) {
       <time class="timeline__date">${event.date}</time>
       <h3 class="timeline__event-title">${event.title}</h3>
       <p class="timeline__text">${event.text}</p>
-      ${photoHtml}
+      ${mediaHtml}
     </div>
   `;
 
@@ -46,29 +141,17 @@ function setupCardModal() {
   const dateEl = modal.querySelector(".modal__date");
   const titleEl = modal.querySelector(".modal__title");
   const textEl = modal.querySelector(".modal__text");
-  const photoWrap = modal.querySelector(".modal__photo-wrap");
-  const photoEl = modal.querySelector(".modal__photo");
+  const mediaWrap = modal.querySelector(".modal__media-wrap");
 
   function openCardModal(event) {
     dateEl.textContent = event.date;
     titleEl.textContent = event.title;
     textEl.textContent = event.text;
 
-    if (event.photo) {
-      photoWrap.hidden = false;
-      photoEl.hidden = false;
-      photoEl.src = event.photo;
-      photoEl.alt = event.title;
-      photoEl.onerror = () => {
-        photoEl.src = PLACEHOLDER;
-      };
-    } else {
-      photoEl.onerror = null;
-      photoEl.removeAttribute("src");
-      photoEl.alt = "";
-      photoEl.hidden = true;
-      photoWrap.hidden = true;
-    }
+    setMediaWrap(mediaWrap, getMediaSrc(event), event.title, {
+      preview: false,
+      className: "modal__media",
+    });
 
     modal.classList.add("modal--open");
     modal.setAttribute("aria-hidden", "false");
@@ -80,12 +163,7 @@ function setupCardModal() {
     modal.classList.remove("modal--open");
     modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("modal-open");
-
-    photoEl.onerror = null;
-    photoEl.removeAttribute("src");
-    photoEl.alt = "";
-    photoEl.hidden = true;
-    photoWrap.hidden = true;
+    clearMediaWrap(mediaWrap);
   }
 
   backdrop.addEventListener("click", closeCardModal);
@@ -104,16 +182,19 @@ function createGalleryItem(item, index) {
   el.className = "gallery__item";
   el.style.setProperty("--delay", `${index * 0.08}s`);
 
+  const mediaSrc = getMediaSrc(item);
+  const mediaContent = mediaSrc
+    ? createPreviewWrap(mediaSrc, item.caption, {
+        wrapClass: "gallery__photo-wrap",
+        mediaClass: "gallery__photo",
+      })
+    : `<div class="gallery__photo-wrap">${createMediaHtml(PLACEHOLDER, item.caption, {
+        preview: true,
+        className: "gallery__photo",
+      })}</div>`;
+
   el.innerHTML = `
-    <div class="gallery__photo-wrap">
-      <img
-        src="${item.src}"
-        alt="${item.caption}"
-        class="gallery__photo"
-        loading="lazy"
-        onerror="this.src='${PLACEHOLDER}'"
-      >
-    </div>
+    ${mediaContent}
     <figcaption class="gallery__caption">${item.caption}</figcaption>
   `;
 

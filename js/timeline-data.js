@@ -2,8 +2,11 @@
  * =============================================
  *  PERSONALIZE AQUI — Nossa História
  * =============================================
- * Edite os textos, datas e caminhos das fotos.
- * Coloque suas imagens em: assets/images/
+ * Edite os textos, datas e caminhos das fotos/vídeos.
+ * Coloque suas mídias em: assets/images/
+ *
+ * Use photo (ou media) com caminho de imagem ou vídeo (.mp4, .webm, .mov...)
+ * Exemplo vídeo: photo: "assets/images/nosso-video.mp4"
  */
 
 const TIMELINE = [
@@ -33,20 +36,41 @@ const TIMELINE = [
     title: "A primeira fotinha que nós tiramos juntos",
     text: "Pode até não parecer nada de especial, mas foi a partir daí que minha galeria começou a se encher de fotos do amor da minha vida.",
     photo: "assets/images/primeira-foto.png",
-    side: "right"
+    side: "left"
   },
   {
     date: "7 de Setembro, 2025",
     title: "Nosso piquenique",
     text: "Compramos várias coisinhas e fomos ao Parque das Barrigudas fazer nosso passeio. Foi simples, mas foi perfeito por ser com você.",
     photo: "assets/images/piquinique.png",
-    side: "left"
+    side: "right"
   },
   {
     date: "12 de Setembro, 2025",
     title: "Viagem para Pirassununga",
     text: "Você me acompanhou nessa viagem e foi lá que conheceu minha família por parte de pai.",
     photo: "assets/images/pirassununga.jpeg",
+    side: "right"
+  },
+  {
+    date: "21 de Setembro, 2025",
+    title: "Nossa ida à cachoeira",
+    text: "Essa foi a primeira vez que pegamos a estrada só nós dois. Foi uma aventura e tanto para chegar lá — até a parte de baixo do carro quebrou no caminho — mas, no fim, valeu totalmente a pena.",
+    photo: "assets/images/cachoeira.mp4",
+    side: "right"
+  },
+  {
+    date: "29 de Outubro, 2025",
+    title: "Primeiro Punch",
+    text: "Essa foi a primeira vez que pegamos a estrada só nós dois. Foi uma aventura e tanto para chegar lá — até a parte de baixo do carro quebrou no caminho — mas, no fim, valeu totalmente a pena.",
+    photo: "assets/images/outubro.jpeg",
+    side: "left"
+  },
+  {
+    date: "22 de Novembro, 2025",
+    title: "Nosso aniversário de 3 meses",
+    text: "Essa foi a primeira vez que pegamos a estrada só nós dois. Foi uma aventura e tanto para chegar lá — até a parte de baixo do carro quebrou no caminho — mas, no fim, valeu totalmente a pena.",
+    photo: "assets/images/novembro.jpeg",
     side: "right"
   },
 ];
