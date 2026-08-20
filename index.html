@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1 Ano — Nossa História</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- ========== TELA INICIAL ========== -->
+  <section id="landing" class="landing">
+    <div class="landing__bg"></div>
+    <div class="landing__content">
+      <div class="landing__photo-wrap">
+        <img
+          src="assets/images/foto-principal.png"
+          alt="Nós dois"
+          class="landing__photo"
+        >
+        <div class="landing__photo-glow"></div>
+      </div>
+      <h1 class="landing__title">1 ano de nós</h1>
+      <p class="landing__subtitle">Uma história que mal começou...</p>
+      <button id="btn-comecar" class="btn-comecar">
+        <span>Começar</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+    <div class="landing__hearts" aria-hidden="true"></div>
+  </section>
+
+  <!-- ========== TIMELINE ========== -->
+  <main id="timeline" class="timeline hidden">
+    <header class="timeline__header">
+      <p class="timeline__intro">Nossa linha do tempo</p>
+      <h2>Cada momento contou</h2>
+    </header>
+
+    <div class="timeline__track">
+      <div class="timeline__line" aria-hidden="true"></div>
+      <!-- Os eventos são inseridos via JavaScript -->
+      <div id="timeline-events" class="timeline__events"></div>
+    </div>
+
+    <!-- Seção de fotos extras -->
+    <section class="gallery">
+      <h2 class="gallery__title">Momentos que guardo no coração</h2>
+      <p class="gallery__subtitle">Algumas das nossas fotos favoritas</p>
+      <div id="gallery-grid" class="gallery__grid"></div>
+    </section>
+
+    <!-- Mensagem final -->
+    <section class="finale">
+      <div class="finale__card">
+        <p class="finale__label">Para você</p>
+        <h2 class="finale__title">Obrigado por esse ano</h2>
+        <p class="finale__text" id="finale-text">
+          Escreva aqui sua mensagem especial para ela...
+        </p>
+        <div class="finale__hearts">♥ ♥ ♥</div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Feito com amor · <span id="footer-date"></span></p>
+    </footer>
+  </main>
+
+  <!-- Modal do card -->
+  <div id="card-modal" class="modal" aria-hidden="true">
+    <div class="modal__backdrop"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal__close" type="button" aria-label="Fechar">&times;</button>
+      <div class="modal__content">
+        <time class="modal__date"></time>
+        <h3 class="modal__title" id="modal-title"></h3>
+        <p class="modal__text"></p>
+        <div class="modal__photo-wrap" hidden>
+          <img src="" alt="" class="modal__photo">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/timeline-data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
