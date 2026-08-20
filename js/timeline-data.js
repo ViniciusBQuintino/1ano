@@ -62,14 +62,14 @@ const TIMELINE = [
   {
     date: "29 de Outubro, 2025",
     title: "Primeiro Punch",
-    text: "Essa foi a primeira vez que pegamos a estrada só nós dois. Foi uma aventura e tanto para chegar lá — até a parte de baixo do carro quebrou no caminho — mas, no fim, valeu totalmente a pena.",
+    text: "Essa foi a primeira vez que fomos ao Punch juntos. Mesmo que a gente não vá lá todo mês, eu guardei esse momento com muito carinho.",
     photo: "assets/images/outubro.jpeg",
     side: "left"
   },
   {
     date: "22 de Novembro, 2025",
     title: "Nosso aniversário de 3 meses",
-    text: "Essa foi a primeira vez que pegamos a estrada só nós dois. Foi uma aventura e tanto para chegar lá — até a parte de baixo do carro quebrou no caminho — mas, no fim, valeu totalmente a pena.",
+    text: "Fomos a uma churrascaria comemorar nossos 3 meses. Parece que foi ontem, mas já se passaram 9 meses desde então. Foi também o mês em que tirei o aparelho — então, a partir daqui, as fotos ficam ainda mais sorridentes.",
     photo: "assets/images/novembro.jpeg",
     side: "right"
   },

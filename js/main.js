@@ -177,28 +177,216 @@ function setupCardModal() {
   return { openCardModal, closeCardModal };
 }
 
-function createGalleryItem(item, index) {
-  const el = document.createElement("figure");
-  el.className = "gallery__item";
-  el.style.setProperty("--delay", `${index * 0.08}s`);
+function createDeckCard(item, index, total) {
+  const card = document.createElement("article");
+  card.className = "deck__card";
+  card.dataset.index = String(index);
 
-  const mediaSrc = getMediaSrc(item);
-  const mediaContent = mediaSrc
-    ? createPreviewWrap(mediaSrc, item.caption, {
-        wrapClass: "gallery__photo-wrap",
-        mediaClass: "gallery__photo",
-      })
-    : `<div class="gallery__photo-wrap">${createMediaHtml(PLACEHOLDER, item.caption, {
-        preview: true,
-        className: "gallery__photo",
-      })}</div>`;
+  const mediaSrc = getMediaSrc(item) || PLACEHOLDER;
+  const depth = total - 1 - index;
+  const offsetY = Math.min(depth, 2) * 8;
+  const scale = 1 - Math.min(depth, 2) * 0.04;
+  const rotate = depth === 0 ? 0 : depth % 2 === 0 ? -3 : 3;
 
-  el.innerHTML = `
-    ${mediaContent}
-    <figcaption class="gallery__caption">${item.caption}</figcaption>
-  `;
+  card.style.transform = `translateY(${offsetY}px) scale(${scale}) rotate(${rotate}deg)`;
+  card.style.zIndex = String(100 - depth);
 
-  return el;
+  if (isVideoSrc(mediaSrc)) {
+    card.innerHTML = `
+      <video src="${mediaSrc}" class="deck__media" muted playsinline preload="metadata" aria-label="${item.caption}"></video>
+      <span class="deck__play" aria-hidden="true">▶</span>
+      <span class="deck__hint deck__hint--left">←</span>
+      <span class="deck__hint deck__hint--right">→</span>
+    `;
+  } else {
+    card.innerHTML = `
+      <img
+        src="${mediaSrc}"
+        alt="${item.caption}"
+        class="deck__media"
+        draggable="false"
+        onerror="this.src='${PLACEHOLDER}'"
+      >
+      <span class="deck__hint deck__hint--left">←</span>
+      <span class="deck__hint deck__hint--right">→</span>
+    `;
+  }
+
+  return card;
+}
+
+function setupGalleryDeck() {
+  const stack = document.getElementById("gallery-deck");
+  const captionEl = document.getElementById("gallery-caption");
+  const counterEl = document.getElementById("gallery-counter");
+
+  let items = [...GALLERY];
+  let currentIndex = 0;
+  let isAnimating = false;
+  let dragStartX = null;
+  let dragDeltaX = 0;
+  let didDrag = false;
+
+  function updateMeta() {
+    const item = items[currentIndex];
+    captionEl.classList.add("is-updating");
+    setTimeout(() => {
+      captionEl.textContent = item ? item.caption : "Todas as fotos ♥";
+      captionEl.classList.remove("is-updating");
+    }, 150);
+
+    counterEl.textContent = items.length
+      ? `${currentIndex + 1} / ${items.length}`
+      : "";
+  }
+
+  function layoutStack() {
+    const cards = [...stack.querySelectorAll(".deck__card:not(.is-leaving-left):not(.is-leaving-right)")];
+    cards.forEach((card, i) => {
+      const depth = cards.length - 1 - i;
+      const offsetY = Math.min(depth, 2) * 8;
+      const scale = 1 - Math.min(depth, 2) * 0.04;
+      const rotate = depth === 0 ? 0 : depth % 2 === 0 ? -3 : 3;
+      card.style.transition = "transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)";
+      card.style.transform = `translateY(${offsetY}px) scale(${scale}) rotate(${rotate}deg)`;
+      card.style.zIndex = String(100 - depth);
+      card.classList.toggle("is-top", depth === 0);
+    });
+  }
+
+  function renderDeck() {
+    stack.innerHTML = "";
+
+    if (!items.length) {
+      stack.innerHTML = `
+        <div class="deck__empty">
+          <span>Você folheou todas as fotos ♥</span>
+          <button type="button" class="deck__empty-btn" id="deck-reset">Ver de novo</button>
+        </div>
+      `;
+      captionEl.textContent = "";
+      counterEl.textContent = "";
+      stack.querySelector("#deck-reset")?.addEventListener("click", () => {
+        items = [...GALLERY];
+        currentIndex = 0;
+        renderDeck();
+      });
+      return;
+    }
+
+    const visible = items.slice(currentIndex, currentIndex + 3);
+    visible
+      .slice()
+      .reverse()
+      .forEach((item, reverseIndex) => {
+        const absoluteIndex = currentIndex + (visible.length - 1 - reverseIndex);
+        const card = createDeckCard(item, absoluteIndex, visible.length);
+        stack.appendChild(card);
+      });
+
+    layoutStack();
+    updateMeta();
+    bindTopCardGestures();
+  }
+
+  function getTopCard() {
+    return stack.querySelector(".deck__card.is-top");
+  }
+
+  function swipe(direction) {
+    if (isAnimating || !items.length) return;
+
+    const card = getTopCard();
+    if (!card) return;
+
+    isAnimating = true;
+    card.classList.remove("is-dragging-left", "is-dragging-right");
+    card.style.transition = "none";
+    card.style.transform = "";
+    // Força reflow para a animação de queda começar do zero
+    void card.offsetWidth;
+    card.classList.add(direction === "left" ? "is-leaving-left" : "is-leaving-right");
+
+    setTimeout(() => {
+      card.remove();
+      currentIndex += 1;
+
+      if (currentIndex >= items.length) {
+        items = [];
+        currentIndex = 0;
+        renderDeck();
+      } else {
+        const nextUpcoming = items[currentIndex + 2];
+        if (nextUpcoming) {
+          const under = createDeckCard(nextUpcoming, currentIndex + 2, 3);
+          under.style.transform = "translateY(16px) scale(0.92) rotate(3deg)";
+          under.style.zIndex = "97";
+          stack.insertBefore(under, stack.firstChild);
+        }
+        layoutStack();
+        updateMeta();
+        bindTopCardGestures();
+      }
+
+      isAnimating = false;
+    }, 750);
+  }
+
+  function bindTopCardGestures() {
+    const card = getTopCard();
+    if (!card) return;
+
+    card.onpointerdown = (e) => {
+      if (isAnimating) return;
+      dragStartX = e.clientX;
+      dragDeltaX = 0;
+      didDrag = false;
+      card.setPointerCapture?.(e.pointerId);
+      card.style.transition = "none";
+    };
+
+    card.onpointermove = (e) => {
+      if (dragStartX === null || isAnimating) return;
+      dragDeltaX = e.clientX - dragStartX;
+      if (Math.abs(dragDeltaX) > 8) didDrag = true;
+      const rotate = dragDeltaX * 0.08;
+      card.style.transform = `translateX(${dragDeltaX}px) rotate(${rotate}deg)`;
+      card.classList.toggle("is-dragging-left", dragDeltaX < -30);
+      card.classList.toggle("is-dragging-right", dragDeltaX > 30);
+    };
+
+    card.onpointerup = (e) => {
+      if (dragStartX === null) return;
+      const threshold = 80;
+
+      if (dragDeltaX <= -threshold) {
+        swipe("left");
+      } else if (dragDeltaX >= threshold) {
+        swipe("right");
+      } else if (!didDrag) {
+        const mid = card.getBoundingClientRect().left + card.offsetWidth / 2;
+        swipe(e.clientX < mid ? "left" : "right");
+      } else {
+        card.style.transition = "transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)";
+        card.classList.remove("is-dragging-left", "is-dragging-right");
+        layoutStack();
+      }
+
+      dragStartX = null;
+      dragDeltaX = 0;
+      didDrag = false;
+    };
+
+    card.onpointercancel = () => {
+      dragStartX = null;
+      dragDeltaX = 0;
+      didDrag = false;
+      card.classList.remove("is-dragging-left", "is-dragging-right");
+      layoutStack();
+    };
+  }
+
+  renderDeck();
 }
 
 function renderTimeline(openCardModal) {
@@ -208,14 +396,7 @@ function renderTimeline(openCardModal) {
   });
 }
 
-function renderGallery() {
-  const container = document.getElementById("gallery-grid");
-  GALLERY.forEach((item, i) => {
-    container.appendChild(createGalleryItem(item, i));
-  });
-}
-
-function setupScrollAnimations() {
+function setupScrollAnimations(root = document) {
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -227,9 +408,66 @@ function setupScrollAnimations() {
     { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
   );
 
-  document
-    .querySelectorAll(".timeline__event, .gallery__item, .finale__card, .timeline__header")
-    .forEach((el) => observer.observe(el));
+  root
+    .querySelectorAll(".timeline__event, .finale__card, .timeline__header, .gallery__header")
+    .forEach((el) => {
+      if (!el.dataset.observed) {
+        el.dataset.observed = "true";
+        observer.observe(el);
+      }
+    });
+
+  return observer;
+}
+
+function revealStageHeader(stageId) {
+  requestAnimationFrame(() => {
+    const stage = document.getElementById(stageId);
+    if (!stage) return;
+
+    stage
+      .querySelectorAll(".timeline__header, .gallery__header, .finale__card")
+      .forEach((el) => el.classList.add("visible"));
+  });
+}
+
+function goToStage(nextId) {
+  const current = document.querySelector(".stage.stage--active:not(.hidden)");
+  const next = document.getElementById(nextId);
+
+  if (!next || next === current) return;
+
+  const finish = () => {
+    if (current) {
+      current.classList.add("hidden");
+      current.classList.remove("stage--active", "stage--exit");
+      current.setAttribute("aria-hidden", "true");
+    }
+
+    next.classList.remove("hidden");
+    next.classList.add("stage--active");
+    next.setAttribute("aria-hidden", "false");
+    document.body.dataset.stage = nextId;
+    window.scrollTo({ top: 0, behavior: "instant" });
+    revealStageHeader(nextId);
+    setupScrollAnimations(next);
+  };
+
+  if (!current) {
+    finish();
+    return;
+  }
+
+  current.classList.add("stage--exit");
+  setTimeout(finish, 550);
+}
+
+function setupStageNavigation() {
+  document.querySelectorAll("[data-next]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      goToStage(btn.dataset.next);
+    });
+  });
 }
 
 function setupLandingHearts() {
@@ -247,37 +485,19 @@ function setupLandingHearts() {
   }
 }
 
-function startExperience() {
-  const landing = document.getElementById("landing");
-  const timeline = document.getElementById("timeline");
-
-  landing.classList.add("landing--exit");
-
-  setTimeout(() => {
-    landing.classList.add("hidden");
-    timeline.classList.remove("hidden");
-    document.body.classList.add("timeline-active");
-    window.scrollTo({ top: 0, behavior: "instant" });
-
-    requestAnimationFrame(() => {
-      document.querySelector(".timeline__header")?.classList.add("visible");
-    });
-  }, 800);
-}
-
 function init() {
   const { openCardModal } = setupCardModal();
 
   renderTimeline(openCardModal);
-  renderGallery();
+  setupGalleryDeck();
 
   document.getElementById("finale-text").textContent = FINALE_MESSAGE.trim();
   document.getElementById("footer-date").textContent = new Date().getFullYear();
+  document.body.dataset.stage = "landing";
 
   setupLandingHearts();
-  setupScrollAnimations();
-
-  document.getElementById("btn-comecar").addEventListener("click", startExperience);
+  setupStageNavigation();
+  setupScrollAnimations(document.getElementById("timeline"));
 }
 
 document.addEventListener("DOMContentLoaded", init);

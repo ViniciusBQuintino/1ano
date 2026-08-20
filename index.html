@@ -12,7 +12,7 @@
 </head>
 <body>
   <!-- ========== TELA INICIAL ========== -->
-  <section id="landing" class="landing">
+  <section id="landing" class="landing stage stage--active">
     <div class="landing__bg"></div>
     <div class="landing__content">
       <div class="landing__photo-wrap">
@@ -25,7 +25,7 @@
       </div>
       <h1 class="landing__title">1 ano de nós</h1>
       <p class="landing__subtitle">Uma história que mal começou...</p>
-      <button id="btn-comecar" class="btn-comecar">
+      <button id="btn-comecar" class="btn-next" type="button" data-next="timeline">
         <span>Começar</span>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -36,7 +36,7 @@
   </section>
 
   <!-- ========== TIMELINE ========== -->
-  <main id="timeline" class="timeline hidden">
+  <section id="timeline" class="stage timeline hidden" aria-hidden="true">
     <header class="timeline__header">
       <p class="timeline__intro">Nossa linha do tempo</p>
       <h2>Cada momento contou</h2>
@@ -44,19 +44,48 @@
 
     <div class="timeline__track">
       <div class="timeline__line" aria-hidden="true"></div>
-      <!-- Os eventos são inseridos via JavaScript -->
       <div id="timeline-events" class="timeline__events"></div>
     </div>
 
-    <!-- Seção de fotos extras -->
-    <section class="gallery">
-      <h2 class="gallery__title">Momentos que guardo no coração</h2>
-      <p class="gallery__subtitle">Algumas das nossas fotos favoritas</p>
-      <div id="gallery-grid" class="gallery__grid"></div>
-    </section>
+    <div class="stage__cta">
+      <p class="stage__cta-text">Pronto para ver mais momentos nossos?</p>
+      <button class="btn-next" type="button" data-next="gallery">
+        <span>Ver nossas fotos</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </section>
 
-    <!-- Mensagem final -->
-    <section class="finale">
+  <!-- ========== GALERIA ========== -->
+  <section id="gallery" class="stage gallery-stage hidden" aria-hidden="true">
+    <header class="gallery__header">
+      <h2 class="gallery__title">Momentos que guardo no coração</h2>
+      <p class="gallery__subtitle">Toque na esquerda ou na direita para folhear</p>
+    </header>
+
+    <div class="deck">
+      <div id="gallery-deck" class="deck__stack" aria-label="Carrossel de fotos"></div>
+      <p id="gallery-caption" class="deck__caption"></p>
+      <p id="gallery-counter" class="deck__counter"></p>
+      <p class="deck__tips"><span>← esquerda</span><span>direita →</span></p>
+    </div>
+
+    <div class="stage__cta">
+      <p class="stage__cta-text">Tem uma mensagem especial esperando por você</p>
+      <button class="btn-next" type="button" data-next="finale">
+        <span>Ler mensagem</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ========== MENSAGEM FINAL ========== -->
+  <section id="finale" class="stage finale-stage hidden" aria-hidden="true">
+    <div class="finale">
       <div class="finale__card">
         <p class="finale__label">Para você</p>
         <h2 class="finale__title">Obrigado por esse ano</h2>
@@ -65,12 +94,12 @@
         </p>
         <div class="finale__hearts">♥ ♥ ♥</div>
       </div>
-    </section>
+    </div>
 
     <footer class="footer">
       <p>Feito com amor · <span id="footer-date"></span></p>
     </footer>
-  </main>
+  </section>
 
   <!-- Modal do card -->
   <div id="card-modal" class="modal" aria-hidden="true">
