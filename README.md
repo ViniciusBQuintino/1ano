@@ -13,7 +13,7 @@ Página romântica para celebrar 1 ano de namoro.
    - Edite as datas, títulos e textos de cada momento
    - Adicione ou remova eventos no array `TIMELINE`
    - Edite as fotos da galeria no array `GALLERY`
-   - Escreva sua mensagem final em `FINALE_MESSAGE`
+   - Escreva sua carta final em `FINALE_LETTER` (título, saudação, corpo, despedida, assinatura)
 
 3. **Abra no navegador**:
    - Dê duplo clique em `index.html`, ou

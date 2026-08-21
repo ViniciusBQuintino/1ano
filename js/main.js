@@ -560,14 +560,51 @@ function setupLandingHearts() {
   }
 }
 
+function renderFinaleLetter() {
+  const letter = typeof FINALE_LETTER !== "undefined" ? FINALE_LETTER : null;
+  if (!letter) return;
+
+  const titleEl = document.getElementById("letter-title");
+  const greetingEl = document.getElementById("letter-greeting");
+  const bodyEl = document.getElementById("letter-body");
+  const farewellEl = document.getElementById("letter-farewell");
+  const signatureEl = document.getElementById("letter-signature");
+
+  titleEl.textContent = letter.title || "";
+  greetingEl.textContent = letter.greeting || "";
+  farewellEl.textContent = letter.farewell || "";
+  signatureEl.textContent = letter.signature || "";
+
+  bodyEl.innerHTML = "";
+  const paragraphs = Array.isArray(letter.body)
+    ? letter.body
+    : String(letter.body || "")
+        .split(/\n\s*\n/)
+        .map((p) => p.trim())
+        .filter(Boolean);
+
+  paragraphs.forEach((text) => {
+    const p = document.createElement("p");
+    p.className = "letter__paragraph";
+    p.textContent = text;
+    bodyEl.appendChild(p);
+  });
+
+  titleEl.hidden = !letter.title;
+  greetingEl.hidden = !letter.greeting;
+  farewellEl.hidden = !letter.farewell;
+  signatureEl.hidden = !letter.signature;
+  bodyEl.hidden = paragraphs.length === 0;
+}
+
 function init() {
   const { openCardModal } = setupCardModal();
   const music = setupBackgroundMusic();
 
   renderTimeline(openCardModal);
   setupGalleryDeck();
+  renderFinaleLetter();
 
-  document.getElementById("finale-text").textContent = FINALE_MESSAGE.trim();
   document.getElementById("footer-date").textContent = new Date().getFullYear();
   document.body.dataset.stage = "landing";
 

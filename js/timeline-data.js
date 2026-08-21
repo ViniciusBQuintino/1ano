@@ -183,13 +183,26 @@ const GALLERY = [
   { src: "assets/images/7.jpeg", caption: "Você é o amor da minha vida" }
 ];
 
-const FINALE_MESSAGE = `
-  Esse primeiro ano com você foi o mais especial da minha vida.
-  Cada risada, cada abraço, cada conversa até tarde da noite...
-  Você é a pessoa que eu quero acordar ao lado todos os dias.
-  Obrigado por me escolher, por me amar e por ser exatamente quem você é.
-  Que venham muitos, muitos anos de nós. Te amo. ♥
-`;
+/**
+ * Carta final — edite cada parte separadamente
+ * body: cada item do array vira um parágrafo
+ */
+const FINALE_LETTER = {
+  title: "Aonde estamos agora",
+  greeting: "Meu amor,",
+  body: [
+    "Estamos agora completando um ano de namoro, e isso me faz refletir sobre o tanto de coisas que nós já passamos. Assim como todo casal, temos os altos e baixos, mas, mesmo nos momentos mais difíceis, eu nunca deixei de te amar.",
+    "Existem tantas coisas em você que eu amo: seu jeito, seu cheiro, seu esforço, seus olhos, sua orelhinha de neném, seu cuidado, seu afeto, seu jeito estressado de ser, sua maneira de ver as coisas. Sinto que, a cada dia, esse amor aumenta mais e mais.",
+    "Eu sinto saudades na sua falta e me preocupo com você a cada momento, desde se você já chegou em casa até se você já papou. Para mim, você é algo mais que especial.",
+    "Atualmente, estamos vivendo uma parte importante nas nossas vidas. Estou cheio de planos para o amanhã e para os dias seguintes. Quero te acompanhar em cada conquista sua e te levar em cada uma das minhas, e, juntos, estar lá comemorando por nós.",
+    "Eu sei que você está ansiosa para um pedido. Eu te garanto que ele irá chegar, e não teria um momento melhor para marcar essa nova etapa da nossa vida, das nossas novas conquistas, da nossa casinha, da nossa família — que, hoje, atualmente, somos só nós, mas, no futuro, espero bem mais.",
+    "Eu te amo muito, meu amor. Vou fazer o meu máximo por nós. Quero que hoje seja um dia especial, que nós possamos comemorar e rever tudo que nós já passamos, tanto juntos quanto sozinhos. E quero também que você continue sendo essa pessoa tão especial para mim, por quem eu sou apaixonado.",
+    "O futuro é cheio de surpresas, mas eu quero que você se lembre de que você nunca está sozinha. Aonde quer que esteja, a qualquer momento, em qualquer situação, de qualquer forma, você pode sempre contar comigo para o que precisar.",
+    "Eu te amo e amo te amar. Você é uma das melhores coisas que já aconteceram na minha vida, e agradeço todos os dias por ter te conhecido."
+  ],
+  farewell: "Com todo o meu amor,",
+  signature: "Vinicius — Seu futuro marido."
+};
 
 /**
  * Trilha sonora de fundo
