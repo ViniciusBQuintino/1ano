@@ -33,16 +33,23 @@ Depois, em **Settings → Pages** do repositório no GitHub, escolha a branch `m
 
 ```
 1ano/
-├── index.html          # Página principal
-├── css/style.css       # Estilos e animações
+├── index.html
+├── css/style.css
 ├── js/
-│   ├── timeline-data.js  # ← EDITE AQUI (textos e fotos)
-│   └── main.js           # Lógica e animações
-└── assets/images/      # ← COLOQUE SUAS FOTOS AQUI
+│   ├── timeline-data.js
+│   └── main.js
+└── assets/
+    ├── audio/trilha.mp3
+    └── images/
 ```
+
+## Créditos
+
+- Trilha sonora: **Leberch — Romantic** (`leberch-romantic-584478.mp3`), música livre de copyright.
 
 ## Dicas
 
 - Fotos quadradas ou 4:3 funcionam melhor na timeline
 - A foto principal fica melhor em formato retrato (vertical)
 - Enquanto não colocar as fotos, placeholders aparecem automaticamente
+- A música começa ao clicar em **Começar**; use o botão ♪ para pausar

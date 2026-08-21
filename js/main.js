@@ -462,9 +462,84 @@ function goToStage(nextId) {
   setTimeout(finish, 550);
 }
 
-function setupStageNavigation() {
+function setupBackgroundMusic() {
+  const audio = document.getElementById("bg-music");
+  const btn = document.getElementById("btn-music");
+  const config = typeof BACKGROUND_MUSIC !== "undefined" ? BACKGROUND_MUSIC : null;
+
+  if (!audio || !btn || !config?.src) return { start: () => {} };
+
+  audio.src = config.src;
+  audio.loop = config.loop !== false;
+  audio.volume = Math.min(1, Math.max(0, config.volume ?? 0.35));
+  audio.preload = "auto";
+
+  let started = false;
+  let muted = false;
+
+  function updateButton() {
+    const playing = started && !audio.paused && !muted;
+    btn.classList.toggle("is-muted", muted || audio.paused);
+    btn.classList.toggle("is-playing", playing);
+    btn.setAttribute("aria-pressed", muted || audio.paused ? "true" : "false");
+    btn.setAttribute(
+      "aria-label",
+      muted || audio.paused ? "Tocar música" : "Pausar música"
+    );
+  }
+
+  async function start() {
+    if (started) return;
+    started = true;
+    btn.classList.remove("hidden");
+
+    try {
+      await audio.play();
+    } catch (err) {
+      // Se o navegador bloquear, o botão fica disponível para tocar manualmente
+      console.warn("Não foi possível iniciar a música automaticamente:", err);
+    }
+
+    updateButton();
+  }
+
+  btn.addEventListener("click", async () => {
+    if (!started) {
+      await start();
+      return;
+    }
+
+    if (audio.paused || muted) {
+      muted = false;
+      audio.muted = false;
+      try {
+        await audio.play();
+      } catch (err) {
+        console.warn("Falha ao retomar a música:", err);
+      }
+    } else {
+      muted = true;
+      audio.pause();
+    }
+
+    updateButton();
+  });
+
+  audio.addEventListener("play", updateButton);
+  audio.addEventListener("pause", updateButton);
+
+  return { start };
+}
+
+function setupStageNavigation(onFirstAdvance) {
+  let firstAdvanceDone = false;
+
   document.querySelectorAll("[data-next]").forEach((btn) => {
     btn.addEventListener("click", () => {
+      if (!firstAdvanceDone && btn.dataset.next === "timeline") {
+        firstAdvanceDone = true;
+        onFirstAdvance?.();
+      }
       goToStage(btn.dataset.next);
     });
   });
@@ -487,6 +562,7 @@ function setupLandingHearts() {
 
 function init() {
   const { openCardModal } = setupCardModal();
+  const music = setupBackgroundMusic();
 
   renderTimeline(openCardModal);
   setupGalleryDeck();
@@ -496,7 +572,7 @@ function init() {
   document.body.dataset.stage = "landing";
 
   setupLandingHearts();
-  setupStageNavigation();
+  setupStageNavigation(() => music.start());
   setupScrollAnimations(document.getElementById("timeline"));
 }
 
